@@ -1,10 +1,10 @@
 import unittest
 from mock import Mock, patch, call
-from parser import Parser
+from parser import Parser, OptionParser
 
-class ClientTest(unittest.TestCase):
+class TestParser(unittest.TestCase):
 
-    def test_parse(self):
+    def test_parse_options(self):
         parser = Parser(["--top10"])
         expected_dict = {'top10': True, 'perfail': None, 'persuccess': None, 'top10fail': None, 'top10hosts': None}
         self.assertEqual(parser.options, expected_dict)
@@ -25,17 +25,18 @@ class ClientTest(unittest.TestCase):
         expected_dict = {'top10': None, 'perfail': None, 'persuccess': None, 'top10fail': None, 'top10hosts': True}
         self.assertEqual(parser5.options, expected_dict)
 
-    def test_wrongoption(self):
-        try:
-           parser = Parser(["--ltop10"])
-        except:
-           print "exception 1"
+    #@patch("parser.OptionParser.error")
+    #def test_wrongoption(self, mock_error1):
+    #    parser1 = Parser(["--ltop10"])
+    #    mock_error1.assert_has_calls([call('error: no such option: --ltop10')])
 
-    def test_parse2options(self):
-        try:
+    @patch("parser.OptionParser.error")
+    def test_parse_wrong_options(self, mock_error):
            parser = Parser(["--top10", "--top10hosts"])
-        except:
-           print "exception 2"
+           #mock_error.assert_has_calls([call('You need to give only one option')])
+           parser = Parser(["--ltop10"])
+           parser = Parser(["--top10", "hello"])
+           mock_error.assert_has_calls([call('error: no such option: --ltop10')])
 
     def test_pare2args(self):
         try:
