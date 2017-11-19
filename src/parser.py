@@ -1,4 +1,5 @@
 from optparse import OptionParser
+import logging
 
 class Parser:
     def __init__(self, args):
@@ -23,10 +24,34 @@ class Parser:
         return parser
 
     def _check_options(self):
-        pass
+        """
+            Counts the number of options against 1
+            Logs error a
+        """
+        option_counter = 0
+
+        if self.options.top10:
+            option_counter +=1
+        if self.options.persuccess:
+            option_counter +=1
+        if self.options.perfail:
+            option_counter +=1
+        if self.options.top10fail:
+            option_counter +=1
+        if self.options.top10hosts:
+            option_counter +=1
+
+        if option_counter == 0:
+            self.parser.error("You need to give an option")
+            return
+        elif option_counter == 1:
+            return
+        else:
+            self.parser.error("You need to give only one option")
+            return
 
     def _check_args(self):
-        """Checks"""
+        """Checks number of args"""
         if len(self.args) != 0:
             parser.error("no arguments needed")
 
