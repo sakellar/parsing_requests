@@ -156,11 +156,11 @@ line number:606222 error:malformed request, number of columns is not 10
 ### Reports
 Individual reports for each option can be found in data folder:
 ```
-	/data/report_top10.txt
-	/data/report_top10fail.tct
-	/data/report_top10hosts
-  /data/report_per_sucess.txt
-  /data/report_per_fail.txt
+/data/report_top10.txt
+/data/report_top10fail.tct
+/data/report_top10hosts
+/data/report_per_sucess.txt
+/data/report_per_fail.txt
 ```
 
 ## Testing
