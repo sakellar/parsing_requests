@@ -3,12 +3,12 @@ import logging
 from collections import Counter
 from parser import Parser
 
+"""Files needed for this module"""
 file_name_nasa = "../data/NASA_access_log_Aug95"
-output_file = "../data/report.tx"
-
+output_file = "../data/report.txt"
+test_file = "../data/test_file"
 
 class Collector:
-    file_name="../data/NASA_access_log_Aug95"
 
     def __init__(self, args, input_file=file_name_nasa, output_file=output_file):
         self.parser = Parser(args)
@@ -20,78 +20,81 @@ class Collector:
         self.top10hosts_dict = dict()
         self.top10hosts_cnt = Counter()
         self.line_number = 0
-        self.fail_counter = 0
         self.options = self.parser.options
         self.error_lines = {}
-        self.get_method()
         self.input_file = input_file
         self.output_file = output_file
 
-    def get_method(self):
-        method_name = ""
-        if self.options.top10:
-            method_name = "parse_top10"
-        elif self.options.persuccess:
-            method_name = "parse_successful_requests"
-        elif self.options.perfail:
-            method_name = "parse_unsuccessful_requests"
-        elif self.options.top10fail:
-            method_name = "parse_top10unsuccessful"
-        elif self.options.top10hosts:
-            method_name = "parse_top10hosts"
-
-    def parse_top10(self, line):
+    def parse_requested_pages(self, line):
+        """
+        Parses pages and counts the number for each one
+        """
         try:
             self.top10cnt[line.split()[6]] += 1
         except Exception:
-            self.error_lines[self.request_counter] = "mal formed request: cannot parse status"
+            self.error_lines[self.line_number] = "malformed request: cannot parse status"
 
     def parse_successful_requests(self, line):
+        """
+        Counts the number of successful requests
+        """
         try:
             status = line.split()[8]
             if int(status):
                 if int(status) >= 200 and int(status) < 400:
                         self.success_counter += 1
         except ValueError:
-            self.error_lines[self.request_counter] = "mal formed request: status is not an integer"
+            self.error_lines[self.line_number] = "malformed request: status is not an integer"
+            self.request_counter -= 1
         except Exception:
-            self.error_lines[self.request_counter] = "mal formed request: cannot parse status"
+            self.error_lines[self.line_number] = "malformed request: cannot parse status"
+            self.request_counter -= 1
 
-    def parse_unsuccessful_requests(self, line):
+    def parse_request_per_host(self, line):
+        """
+        Collects request, number of requests per host
+        """
         try:
-            status = line.split()[8]
-            if int(status):
-                if not (int(status) >= 200 and int(status) < 400):
-                        self.fail_counter += 1
-        except ValueError:
-            self.error_lines[self.request_counter] = "mal formed request: status is not an integer"
-        except Exception:
-            self.error_lines[self.request_counter] = "mal formed request: cannot parse status"
+            host = line.split()[0]
+            self.top10hosts[host] += 1
+            if self.top10hosts_dict == {}:
+                cnt = Counter()
+                cnt[line.split()[6]] += 1
+                self.top10hosts_dict[host] = cnt
+            else:
+                if self.top10hosts_dict.has_key(host): 
+                    value_cnt = self.top10hosts_dict[host]
+                    value_cnt[line.split()[6]] += 1
+                    self.top10hosts_dict[host] = value_cnt
+                else:
+                    cnt = Counter()
+                    cnt[line.split()[6]] += 1
+                    self.top10hosts_dict[host] = cnt
 
-    def parse_top10general(self, line):
-        try:
-            self.top10hosts[line.split()[0]] += 1
-        except Exception:
-            self.error_lines[self.request_counter] = "mal formed request: cannot parse status"
+        except Exception as e:
+            self.error_lines[self.line_number] = "malformed request: cannot parse status"
+            self.request_counter -= 1
 
-    def parse_top10unsuccessful(self, line):
+    def parse_unsuccessful_page_requests(self, line):
+        """
+        Parses requests not in 300s 400s
+        """
         try:
             status = line.split()[8]
             if int(status):
                 if not (int(status) >= 200 and int(status) < 400):
                     self.top10uncnt[line.split()[6]] += 1
         except ValueError:
-            self.error_lines[self.request_counter] = "mal formed request: status is not an integer"
+            self.error_lines[self.line_number] = "malformed request: status is not an integer"
+            self.request_counter -= 1
         except Exception:
-            self.error_lines[self.request_counter] = "mal formed request: cannot parse status"
-
-    def parse_top10hosts(self, line):
-        try:
-            self.top10hosts[line.split()[0]] += 1
-        except Exception:
-            self.error_lines[self.request_counter] = "mal formed request: cannot parse status"
+            self.error_lines[self.line_number] = "malformed request: cannot parse status"
+            self.request_counter -= 1
 
     def produce_report_for_selected_option(self):
+        """
+        Returns report for selected option
+        """
         if self.options.top10:
             top10requests =  "----Top 10 requests----\n"
             for item in self.top10cnt.most_common(10):
@@ -100,7 +103,7 @@ class Collector:
         elif self.options.persuccess:
             return "Percentage of successful requests: {}".format(float(self.success_counter)/self.request_counter) + "\n"
         elif self.options.perfail:
-            return "Percentage of unsuccessful requests: {}".format(float(self.fail_counter)/self.request_counter) + "\n"
+            return "Percentage of unsuccessful requests: {}".format(float(self.request_counter -self.success_counter)/self.request_counter) + "\n"
         elif self.options.top10fail:
             top10requests =  "----Top 10 unsuccessful requests----\n"
             for item in self.top10uncnt.most_common(10):
@@ -115,37 +118,51 @@ class Collector:
             return ""
 
     def produce_report(self):
+        """
+        Main function for producing report
+        """
         with open(self.output_file, "w") as f:
             option_log = self.produce_report_for_selected_option()
             if option_log != "":
+                f.write("----Optional Report----\n")
                 f.write(option_log)
+            f.write("----Main Report---\n")
+            top10hosts =  "----Top 10 hosts----\n"
+            for host in self.top10hosts.most_common(10):
+                f.write("host : {0} , Number of requests :  {1}\n".format(host[0], host[1]))
+                f.write("----Top 5 requests-----\n")
+                for request in self.top10hosts_dict[host[0]].most_common(5):
+                     f.write("request : {0} , Number of requests :  {1}\n".format(request[0], request[1]))
             f.write("----Error Log----\n")
             for key, value in self.error_lines.iteritems():
                 error_log = "line number:" + str(key) + " error:" + str(value) +"\n"
                 f.write(error_log)
 
     def collect_statistics(self):
+        """
+        Collects statistics and Produces Report
+        """
         with open(self.input_file) as f:
             for line in f.readlines():
-                print line.split()
                 self.request_counter +=1
                 self.line_number += 1
                 if len(line.split()) != 10:
-                    print self.request_counter
-                    self.error_lines[self.request_counter] = "malformed request, number of columns is not 10"
+                    self.request_counter -= 1
+                    self.error_lines[self.line_number] = "malformed request, number of columns is not 10"
                     continue
-                self.parse_top10general(line)
-                self.parse_top10(line)
-                self.parse_successful_requests(line)
-                self.parse_unsuccessful_requests(line)
-                self.parse_top10unsuccessful(line)
-                self.parse_top10hosts(line)
+                self.parse_request_per_host(line)
+                if self.options.top10:
+                    self.parse_requested_pages(line)
+                if self.options.persuccess or self.options.perfail:
+                    self.parse_successful_requests(line)
+                if self.options.top10fail:
+                    self.parse_unsuccessful_page_requests(line)
         self.produce_report() 
 
 def main():
     try:
-        Collector(sys.argv[1:])
-        Collector.collect_data()
+        collector = Collector(sys.argv[1:])
+        collector.collect_statistics()
     except:
         pass
 
