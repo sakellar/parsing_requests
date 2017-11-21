@@ -99,7 +99,7 @@ request : /shuttle/resources/orbiters/discovery.html  number of requests : 1
 request : /images/NASA-logosmall.gif  number of requests : 1
 request : /shuttle/resources/orbiters/discovery-logo.gif  number of requests : 1
 ```
-### Example 6
+### Example 6:
 ```
 python main_module.py --top10hosts
 ```
@@ -119,7 +119,7 @@ host : ip-pdx6-54.teleport.com , Number of requests :  3
 host : piweba1y.prodigy.com , Number of requests :  2
 host : piweba4y.prodigy.com , Number of requests :  2
 ```
-### Example 6
+### Example 7:
 ```
 python main_module.py --top10fail
 ```
@@ -131,10 +131,8 @@ $ cat report.txt
 request : /shuttle/resources/orbiters/discovery.gif 
 request : /images/ksclogosmall.gif 
 ```
-
+### Example 8:
 For each Optional report a main report is aslo produced displaying for each of the top 10 hosts, show the top 5 pages requested and the number of requests for each
-
-### Example 7
 ```
 $ cat report.txt | less
 ----Main Report---
@@ -146,8 +144,7 @@ request : /images/USA-logosmall.gif , Number of requests :  1
 request : /images/mlp-logo.gif , Number of requests :  1
 request : /images/ksclogo-medium.gif , Number of requests :  1
 ```
-
-### Example 8 
+### Example 9: 
 The log file contains malformed entries; for each malformed line, display an error message and the line number.
 ```
 $ cat report.txt | less
@@ -155,6 +152,15 @@ $ cat report.txt | less
 line number:270336 error:malformed request, number of columns is not 10
 line number:622595 error:malformed request, number of columns is not 10
 line number:606222 error:malformed request, number of columns is not 10
+```
+### Reports
+Individual reports for each option can be found in data folder:
+```
+	/data/report_top10.txt
+	/data/report_top10fail.tct
+	/data/report_top10hosts
+  /data/report_per_sucess.txt
+  /data/report_per_fail.txt
 ```
 
 ## Testing
