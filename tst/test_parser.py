@@ -25,24 +25,13 @@ class TestParser(unittest.TestCase):
         expected_dict = {'top10': None, 'perfail': None, 'persuccess': None, 'top10fail': None, 'top10hosts': True}
         self.assertEqual(parser5.options, expected_dict)
 
-    #@patch("parser.OptionParser.error")
-    #def test_wrongoption(self, mock_error1):
-    #    parser1 = Parser(["--ltop10"])
-    #    mock_error1.assert_has_calls([call('error: no such option: --ltop10')])
-
     @patch("parser.OptionParser.error")
     def test_parse_wrong_options(self, mock_error):
            parser = Parser(["--top10", "--top10hosts"])
            #mock_error.assert_has_calls([call('You need to give only one option')])
            parser = Parser(["--ltop10"])
            parser = Parser(["--top10", "hello"])
-           mock_error.assert_has_calls([call('error: no such option: --ltop10')])
+           mock_error.assert_has_calls([call('no such option: --ltop10'), call('You need to give an option'),call('no arguments needed')])
 
-    def test_pare2args(self):
-        try:
-           parser = Parser(["--top10", "hello"])
-        except:
-            print "exception 3"
-        
 if __name__ == '__main__':
     unittest.main()
