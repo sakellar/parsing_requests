@@ -17,6 +17,7 @@ Install python mock
 ```
 $ sudo pip install mock
 ```
+Unzip NASA HTTP log inside data/ directory.
 
 ## INSTALL
 Alternatevely if you have donwloaded source code:
@@ -27,15 +28,25 @@ python setup.py install
 ## Documentation
 To collect statistics and use this tool. Assuming you have dowloaded/cloned source code.
 Go inside src code. Then run python main_module.py
+To get the report.txt for NASA file unzip NASA file inside data/ directory.
+When you run python main_module inside src/ directory then the default input/output files for this script 
+is to read from:
+```
+file_name_nasa = "../data/NASA_access_log_Aug95"
+```
+and write to:
+```
+output_file = "../data/report.txt"
+```
 
-###Example 1:
+### Example 1:
 ```
 $ python main_module.py --top10hostsadadsd
 Usage: exec [--top10] [--persucess] [--perfail] [--top10fail] [--top10hosts] [--all]
 
 main_module.py: error: no such option: --top10hostsadadsd
 ```
-###Example 2:
+### Example 2:
 ```
 $ python main_module.py --help
 Usage: exec [--top10] [--persucess] [--perfail] [--top10fail] [--top10hosts]
@@ -48,7 +59,7 @@ Options:
   --top10fail   4.  Top 10 unsuccessful page requests
   --top10hosts  5.  The top 10 hosts making the most requests
 ```
-###Example 3 (Does not check if request status code is wrong i.e. 211):
+### Example 3 (Does not check if request status code is wrong i.e. 211):
 ```
 python main_module.py  --persuccess
 ```
@@ -57,22 +68,25 @@ Then result report will be the following:
 $ cat report.txt 
 Percentage of successful requests: 0.954545454545
 ```
-###Example 4:
+### Example 4:
 ```
+----Optional Report----
 python main_module.py  --perfail
 ```
 Then result report will be the following:
 ```
 $ cat report.txt 
+----Optional Report----
 Percentage of unsuccessful requests: 0.0454545454545
 ```
-###Example 5:
+### Example 5:
 ```
 python main_module.py  --top10
 ```
 Then result report will be the following:
 ```
 $ cat report.txt 
+----Optional Report----
 ----Top 10 requests----
 request : /history/apollo/apollo-13/apollo-13-patch-small.gif  number of requests : 3
 request : /shuttle/countdown/  number of requests : 3
@@ -85,13 +99,14 @@ request : /shuttle/resources/orbiters/discovery.html  number of requests : 1
 request : /images/NASA-logosmall.gif  number of requests : 1
 request : /shuttle/resources/orbiters/discovery-logo.gif  number of requests : 1
 ```
-###Example 6
+### Example 6
 ```
 python main_module.py --top10hosts
 ```
 Then result report will be the following:
 ```
 $ cat report.txt 
+----Optional Report----
 ----Top 10 hosts----
 host : pm9.j51.com , Number of requests :  6
 host : uplherc.upl.com , Number of requests :  6
@@ -104,33 +119,62 @@ host : ip-pdx6-54.teleport.com , Number of requests :  3
 host : piweba1y.prodigy.com , Number of requests :  2
 host : piweba4y.prodigy.com , Number of requests :  2
 ```
-###Example 6
+### Example 6
 ```
 python main_module.py --top10fail
 ```
 Then result report will be the following:
 ```
-$ cat report.txt 
+$ cat report.txt
+----Optional Report----
 ----Top 10 unsuccessful requests----
 request : /shuttle/resources/orbiters/discovery.gif 
 request : /images/ksclogosmall.gif 
 ```
-python main_module.py --top10fail
+
+For each Optional report a main report is aslo produced displaying for each of the top 10 hosts, show the top 5 pages requested and the number of requests for each
+
+### Example 7
+```
+$ cat report.txt | less
+----Main Report---
+host : pm9.j51.com , Number of requests :  6
+----Top 5 requests-----
+request : /facilities/mlp.html , Number of requests :  1
+request : /images/NASA-logosmall.gif , Number of requests :  1
+request : /images/USA-logosmall.gif , Number of requests :  1
+request : /images/mlp-logo.gif , Number of requests :  1
+request : /images/ksclogo-medium.gif , Number of requests :  1
+```
+
+### Example 8 
+The log file contains malformed entries; for each malformed line, display an error message and the line number.
+```
+$ cat report.txt | less
+----Error Log----
+line number:270336 error:malformed request, number of columns is not 10
+line number:622595 error:malformed request, number of columns is not 10
+line number:606222 error:malformed request, number of columns is not 10
+```
+
 ## Testing
 
 To test  code you can run inside tst directory
 ```
 bash run_tests.sh
 ```
-Alternatively you can run explicitily tests
+
+Alternatively you can run explicitily tests:
 ```
 python -m unittest test_parser
 ```
-Unit test for Collector functions
 ```
 python -m unittest test_collector_unit
 ```
-Automated testing for producing different reports for different option.
 ```
 python -m unittest test_collector
 ```
+
+test_parser unit test is the unit test for src/parser.py
+test_collector_unit  unit test is the unit test for Collector class which is imported from main_module.py
+test_collector is an automated test which has input data/test_file and produces different reports for different options
