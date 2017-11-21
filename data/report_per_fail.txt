@@ -1,5 +1,5 @@
 ----Optional Report----
-Percentage of successful requests: 0.993505026761
+Percentage of unsuccessful requests: 0.0064949732391
 ----Main Report---
 host : edams.ksc.nasa.gov , Number of requests :  6528
 ----Top 5 requests-----
